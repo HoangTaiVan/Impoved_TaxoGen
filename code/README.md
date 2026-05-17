@@ -122,7 +122,7 @@ data/processed/
 ---
 
 # 6. Giải thích dữ liệu
-
+link dữ liệu: https://drive.usercontent.google.com/download?id=1GbxKrxrmFrKt5vgDHP1xe1Qr_rfvR1jh&authuser=0
 ## 6.1 papers.txt
 
 Đây là file QUAN TRỌNG NHẤT.
