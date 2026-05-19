@@ -233,34 +233,45 @@ BASE_SBERT_MODEL = SBERT_MODEL
 FINETUNED_MODEL_DIR = os.path.join(
     MODEL_DIR,
     "sbert_dblp_finetuned",
+    # "sbert_amazon_electronics_finetuned",
 )
 
 # Không nên để 100 hoặc 500 epoch.
 # Với SBERT, 2-3 epoch thường hợp lý.
 EPOCHS = 3
 
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 
 LEARNING_RATE = 2e-5
 
 WARMUP_RATIO = 0.1
 
-MAX_TRAIN_PAIRS = 350000
+MAX_TRAIN_PAIRS = 200000
 
 PAIR_WINDOW_SIZE = 5
 
 
 # ======================================================
-# HDBSCAN
+# ROOT CLUSTERING - KMEANS
 # ======================================================
+# Root dùng KMeans để chia các nhánh lớn tương đối cân bằng,
+# gần với tinh thần Spherical KMeans của TaxoGen gốc.
 
-MIN_CLUSTER_SIZE = 15
+ROOT_N_CLUSTERS = 6
 
-MIN_SAMPLES = None
+
+# ======================================================
+# CHILD CLUSTERING - HDBSCAN
+# ======================================================
+# Các node con dùng HDBSCAN để tách sub-topic tự nhiên và xử lý noise.
+
+MIN_CLUSTER_SIZE = 10
+
+MIN_SAMPLES = 1
 
 CLUSTER_SELECTION_METHOD = "eom"
 
-CLUSTER_SELECTION_EPSILON = 0.05
+CLUSTER_SELECTION_EPSILON = 0.20
 
 HDBSCAN_METRIC = "euclidean"
 
@@ -276,6 +287,21 @@ TOP_K = 10
 MIN_DOCS_TO_SPLIT = 20
 
 MIN_KEYWORDS_TO_SPLIT = MIN_CLUSTER_SIZE * 2
+
+
+# ======================================================
+# ADAPTIVE CLUSTERING LOOP
+# ======================================================
+# Giống tinh thần TaxoGen gốc:
+# cluster -> rank/filter -> recluster.
+
+N_CLUSTER_ITER = 2
+
+# Giữ lại 75% keyword tốt nhất trong mỗi cluster sau BM25+Cosine ranking.
+FILTER_RATIO = 0.75
+
+# Không lọc quá mạnh với node nhỏ.
+MIN_KEYWORDS_AFTER_FILTER = 30
 
 
 # ======================================================
@@ -308,11 +334,11 @@ USE_LOCAL_FINE_TUNE = True
 
 LOCAL_FINE_TUNE_EPOCHS = 2
 
-LOCAL_FINE_TUNE_BATCH_SIZE = 128
+LOCAL_FINE_TUNE_BATCH_SIZE = 64
 
 LOCAL_FINE_TUNE_LR = 2e-5
 
-LOCAL_MAX_TRAIN_PAIRS = 20000
+LOCAL_MAX_TRAIN_PAIRS = 10000
 
 LOCAL_MIN_TRAIN_PAIRS = 100
 
