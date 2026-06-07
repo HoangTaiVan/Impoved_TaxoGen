@@ -2,7 +2,7 @@
 
 An improved implementation of TaxoGen (KDD 2018) for unsupervised topic taxonomy construction using semantic representation learning, density-based clustering, and recursive taxonomy expansion.
 
-The proposed framework replaces the original Word2Vec–CaseOLAP pipeline with a modern semantic architecture based on SBERT, HDBSCAN, and local semantic refinement, enabling the generation of higher-quality topic taxonomies from large-scale text corpora.
+The proposed framework replaces the original Word2Vec–CaseOLAP pipeline with a modern semantic architecture based on SBERT, HDBSCAN, BM25 ranking, and local semantic refinement, enabling the generation of higher-quality topic taxonomies from large-scale text corpora.
 
 ---
 
@@ -43,10 +43,8 @@ To address these limitations, this project introduces a semantic-aware taxonomy 
 # Architecture
 
 The overall architecture of the proposed framework is illustrated below.
-<img width="1495" height="1002" alt="Ảnh chụp màn hình 2026-06-07 231650" src="https://github.com/user-attachments/assets/c1fc8dd1-61cf-4caa-9e85-eb290a7b175a" />
+<img width="1495" height="1002" alt="Ảnh chụp màn hình 2026-06-07 231650" src="https://github.com/user-attachments/assets/b2b4a85c-524b-4810-8fe7-c7a8be05d344" />
 
-
----
 
 # Main Contributions
 
@@ -97,6 +95,8 @@ Representative phrases are selected using a hybrid ranking strategy combining:
 
 This allows the generated taxonomy nodes to be both statistically important and semantically representative.
 
+---
+
 # Installation
 
 Clone the repository:
@@ -114,14 +114,28 @@ pip install -r requirements.txt
 
 ---
 
-# Dataset
+# Supported Datasets
 
-The dataset is not included in this repository due to storage limitations.
+The framework currently supports:
 
-Download the dataset:
+## 1. DBLP Dataset
+
+A preprocessed DBLP package is provided and can be used directly.
+
+Download:
 
 ```bash
 py raw_pipeline/download_data.py
+```
+
+After downloading, the required files are automatically prepared:
+
+```text
+data/processed/
+├── papers.txt
+├── keywords.txt
+├── index.txt
+└── keyword_cnt.txt
 ```
 
 Dataset link:
@@ -132,9 +146,73 @@ https://drive.usercontent.google.com/download?id=1GbxKrxrmFrKt5vgDHP1xe1Qr_rfvR1
 
 ---
 
+## 2. Amazon Fashion 2023 Dataset
+
+Official source:
+
+https://amazon-reviews-2023.github.io/
+
+Download raw Amazon Fashion data:
+
+```bash
+py raw_pipeline/download_amazon_fashion.py
+```
+
+The downloader retrieves:
+
+```text
+Amazon_Fashion.jsonl
+meta_Amazon_Fashion.jsonl
+```
+
+and stores them under:
+
+```text
+data/raw/amazon_fashion/
+```
+
+---
+
+## Amazon Fashion Preprocessing
+
+Unlike DBLP, Amazon Fashion cannot be used directly.
+
+The raw dataset must first be converted into TaxoGen input format.
+
+Run:
+
+```bash
+py processed_pipeline/prepare_amazon_fashion.py
+```
+
+This preprocessing stage performs:
+
+1. Metadata loading
+2. Text cleaning
+3. Product document construction
+4. Phrase extraction
+5. Vocabulary filtering
+6. Keyword generation
+7. papers.txt generation
+8. keywords.txt generation
+
+After preprocessing:
+
+```text
+data/processed/
+├── papers.txt
+└── keywords.txt
+```
+
+will be generated automatically.
+
+These files are then used by the taxonomy generation pipeline.
+
+---
+
 # Required Input Files
 
-The framework only requires two input files:
+The framework only requires:
 
 ```text
 data/processed/
@@ -214,11 +292,12 @@ The system automatically performs:
 ```text
 1. Global SBERT fine-tuning
 2. Keyword embedding generation
-3. Recursive clustering
-4. Local semantic refinement
-5. Taxonomy construction
-6. Taxonomy export
-7. Automatic evaluation
+3. Root taxonomy construction
+4. Recursive clustering
+5. Local semantic refinement
+6. Taxonomy generation
+7. Taxonomy export
+8. Automatic evaluation
 ```
 
 ---
@@ -313,6 +392,8 @@ Supported metrics:
 * Topic Intrusion
 * Parent–Child Relationship
 
+These metrics evaluate both taxonomy quality and annotator agreement.
+
 ---
 
 # Global vs Local Semantic Learning
@@ -351,7 +432,7 @@ Used for:
 Depth > 0 taxonomy refinement
 ```
 
-This allows the model to capture topic-specific semantic structures.
+This enables the framework to learn topic-specific semantic structures.
 
 ---
 
@@ -376,7 +457,7 @@ HDD
 
 # GPU Support
 
-The framework automatically detects available hardware:
+The framework automatically detects:
 
 ```text
 CUDA GPU
@@ -388,7 +469,7 @@ or
 CPU
 ```
 
-SBERT training automatically utilizes GPU acceleration when available.
+SBERT training automatically uses GPU acceleration when available.
 
 ---
 
@@ -416,34 +497,18 @@ MAX_DEPTH = 3
 
 ---
 
-# Complete Workflow
+# Workflow
 
-```text
-Download Dataset
-        ↓
-Global SBERT Fine-tuning
-        ↓
-Keyword Embedding Generation
-        ↓
-Root Taxonomy Construction
-        ↓
-Recursive Taxonomy Expansion
-        ↓
-Local Semantic Refinement
-        ↓
-Taxonomy Tree Generation
-        ↓
-Taxonomy Export
-        ↓
-Automatic Evaluation
-```
+## DBLP Workflow
+<img width="425" height="579" alt="image" src="https://github.com/user-attachments/assets/d67d9f64-604d-48a5-8902-c738330fec7c" />
 
----
+## Amazon Fashion Workflow
+<img width="464" height="640" alt="image" src="https://github.com/user-attachments/assets/f2b45a13-1ca1-4937-80aa-146516c45920" />
 
 # Reference
 
 Zhang, C., Wang, H., Wang, J., et al.
 
-Unsupervised Topic Taxonomy Construction by Adaptive Term Embedding and Clustering.
+**Unsupervised Topic Taxonomy Construction by Adaptive Term Embedding and Clustering.**
 
 Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD 2018).
